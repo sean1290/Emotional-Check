@@ -323,11 +323,11 @@ const EQ = [
 const S = { name:'', ses:'', page:0, ans:{}, pages:[] };
 
 // ── INIT ─────────────────────────────────────────
-addEventListener('DOMContentLoaded', () => {
+addEventListener('DOMContentLoaded', async () => {
   const d = new Date();
   const days = ['일','월','화','수','목','금','토'];
   $('hdrDate').textContent = `${d.getMonth()+1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
-  buildNameSel();
+  await buildNameSel();
   // set today's rotation question
   const rq = EQ.find(q => q.rot);
   if (rq) rq.text = ROT[((d.getDay()+6)%7) % ROT.length];
@@ -338,11 +338,29 @@ function show(id){ document.querySelectorAll('.scr').forEach(s=>s.classList.remo
 function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('on'); setTimeout(()=>t.classList.remove('on'),2200) }
 function setP(pct){ $('prog').style.width = pct+'%' }
 
-function buildNameSel() {
-  const saved = localStorage.getItem(K_NAMES);
-  const names = saved ? saved.split(',').map(n=>n.trim()).filter(Boolean) : NAMES;
+async function buildNameSel() {
   const sel = $('nameSel');
   sel.innerHTML = '<option value="">-- 이름을 선택하세요 --</option>';
+
+  try {
+    // 구글 시트에서 학생 목록 불러오기
+    const res  = await fetch(DEFAULT_SCRIPT_URL + '?action=names');
+    const json = await res.json();
+    if (json.names && json.names.length > 0) {
+      json.names.forEach(n => {
+        const o = document.createElement('option');
+        o.value = o.textContent = n;
+        sel.appendChild(o);
+      });
+      return; // 성공 → 종료
+    }
+  } catch(err) {
+    console.log('시트 연결 실패, 로컬 목록 사용');
+  }
+
+  // 실패 시 로컬 NAMES 배열로 fallback
+  const saved = localStorage.getItem(K_NAMES);
+  const names = saved ? saved.split(',').map(n=>n.trim()).filter(Boolean) : NAMES;
   [...names].sort((a,b)=>a.localeCompare(b,'ko')).forEach(n => {
     const o = document.createElement('option');
     o.value = o.textContent = n;

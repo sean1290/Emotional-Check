@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>감정체크 · Fox Learning Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#FFF8F0; --primary:#FF6B35; --pl:#FFE8DF;
+  --secondary:#4ECDC4; --sl:#E0F7F5;
+  --accent:#FFD166; --al:#FFF5D6;
+  --purple:#A78BFA; --prl:#EDE9FE;
+  --text:#1A1A2E; --muted:#6B7280; --border:#E5E7EB;
+  --shadow:0 4px 24px rgba(0,0,0,.08);
+  --r:20px; --rs:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);min-height:100vh;color:var(--text);overflow-x:hidden}
+
+/* layout */
+.hdr{background:#fff;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.logo{font-family:'Gaegu',cursive;font-size:22px;font-weight:700;color:var(--primary)}
+.logo span{color:var(--text)}
+.hdr-date{font-size:13px;color:var(--muted);font-weight:500}
+.gear{background:none;border:none;font-size:22px;cursor:pointer;opacity:.6;transition:opacity .2s}
+.gear:hover{opacity:1}
+.prog{height:6px;background:var(--border);overflow:hidden;position:sticky;top:64px;z-index:99}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));transition:width .4s cubic-bezier(.4,0,.2,1)}
+
+/* screens */
+.scr{display:none;min-height:calc(100vh - 70px);padding:24px 20px 110px;animation:up .35s ease}
+.scr.on{display:block}
+@keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@media(min-width:480px){.scr{max-width:460px;margin:0 auto}}
+
+/* landing */
+.hero{text-align:center;padding:40px 0 32px}
+.hero-ico{font-size:80px;display:block;margin-bottom:16px;animation:bounce 2s infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.hero h1{font-family:'Gaegu',cursive;font-size:36px;font-weight:700;margin-bottom:8px}
+.hero p{font-size:15px;color:var(--muted);line-height:1.6}
+.lbl{font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px}
+
+/* name dropdown */
+.sel-wrap{position:relative;margin-bottom:28px}
+.sel-wrap::after{content:'▾';position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--purple);pointer-events:none}
+.name-sel{width:100%;padding:16px 48px 16px 20px;border:2.5px solid var(--border);border-radius:var(--r);font-size:17px;font-weight:600;font-family:'Noto Sans KR',sans-serif;background:#fff;color:var(--text);appearance:none;-webkit-appearance:none;cursor:pointer;transition:border-color .2s,box-shadow .2s;box-shadow:var(--shadow);outline:none}
+.name-sel:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(167,139,250,.2)}
+.name-sel.on{border-color:var(--purple);background:var(--prl)}
+
+/* session cards */
+.ses-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:32px 0}
+.ses-card{background:#fff;border:3px solid var(--border);border-radius:var(--r);padding:28px 16px;text-align:center;cursor:pointer;transition:all .22s ease;box-shadow:var(--shadow)}
+.ses-card.am.on,.ses-card.am:hover{border-color:var(--accent);background:var(--al);transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,0,0,.14)}
+.ses-card.pm.on,.ses-card.pm:hover{border-color:var(--secondary);background:var(--sl);transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,0,0,.14)}
+.ses-ico{font-size:44px;display:block;margin-bottom:10px}
+.ses-lbl{font-size:18px;font-weight:700}
+.ses-desc{font-size:12px;color:var(--muted);margin-top:4px}
+
+/* buttons */
+.btn{display:block;width:100%;padding:18px;border:none;border-radius:var(--r);font-size:17px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Noto Sans KR',sans-serif}
+.btn-p{background:linear-gradient(135deg,var(--primary),#FF8C42);color:#fff;box-shadow:0 6px 20px rgba(255,107,53,.35)}
+.btn-p:hover{transform:translateY(-2px)}
+.btn-s{background:#fff;color:var(--text);border:2px solid var(--border);margin-top:12px}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important}
+
+/* question cards */
+.q-hdr{margin-bottom:24px}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:99px;font-size:13px;font-weight:700;margin-bottom:12px}
+.b-am{background:var(--al);color:#B45309}
+.b-pm{background:var(--sl);color:#0F766E}
+.q-name-lbl{font-size:14px;color:var(--muted);font-weight:500}
+.q-name{font-size:22px;font-weight:900;margin-top:2px}
+.q-card{background:#fff;border-radius:var(--r);padding:22px 20px;margin-bottom:16px;box-shadow:var(--shadow);border:2px solid transparent;transition:border-color .2s}
+.q-card.done{border-color:var(--secondary)}
+.q-n{font-size:11px;font-weight:700;color:var(--primary);letter-spacing:.1em;margin-bottom:6px}
+.q-t{font-size:16px;font-weight:700;line-height:1.5;margin-bottom:16px}
+.q-ax{font-size:11px;color:var(--muted);margin-bottom:12px;font-weight:500}
+.rot-tag{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:linear-gradient(135deg,#FF6B35,#FFD166);border-radius:99px;font-size:11px;font-weight:700;color:#fff;margin-bottom:8px}
+
+/* scale */
+.sc-row{display:flex;gap:8px;justify-content:space-between}
+.sc-btn{flex:1;aspect-ratio:1;max-width:58px;border:2px solid var(--border);border-radius:var(--rs);background:#fff;cursor:pointer;font-size:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:all .18s;padding:6px 4px}
+.sc-btn .n{font-size:11px;font-weight:700;color:var(--muted)}
+.sc-btn:hover{transform:scale(1.08);border-color:var(--primary)}
+.sc-btn.on{border-color:var(--primary);background:var(--pl)}
+.sc-lbl{display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:var(--muted)}
+
+/* yes/no */
+.yn-row{display:flex;gap:12px}
+.yn-btn{flex:1;padding:14px;border:2px solid var(--border);border-radius:var(--rs);background:#fff;font-size:16px;font-weight:700;cursor:pointer;transition:all .18s;font-family:'Noto Sans KR',sans-serif}
+.yn-btn.y.on,.yn-btn.y:hover{border-color:var(--secondary);background:var(--sl);color:#0F766E}
+.yn-btn.n.on,.yn-btn.n:hover{border-color:#F87171;background:#FEF2F2;color:#DC2626}
+
+/* choice / multi */
+.ch-grid{display:flex;flex-direction:column;gap:8px}
+.ch-btn{padding:13px 16px;border:2px solid var(--border);border-radius:var(--rs);background:#fff;font-size:14px;font-weight:500;cursor:pointer;text-align:left;transition:all .18s;font-family:'Noto Sans KR',sans-serif;color:var(--text);display:flex;align-items:center;gap:10px}
+.ch-btn .ico{font-size:20px;flex-shrink:0}
+.ch-btn:hover{border-color:var(--purple);background:var(--prl)}
+.ch-btn.on{border-color:var(--purple);background:var(--purple);color:#fff}
+.m-hint{font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:600}
+
+/* sub-question */
+.sub{margin-top:12px;padding:14px;background:var(--al);border-radius:var(--rs);display:none}
+.sub.on{display:block}
+.sub-t{font-size:13px;font-weight:700;margin-bottom:10px}
+
+/* text */
+.txt-in{width:100%;padding:12px 14px;border:2px solid var(--border);border-radius:var(--rs);font-size:15px;font-family:'Noto Sans KR',sans-serif;color:var(--text);outline:none;transition:border-color .2s;resize:none;background:#fff}
+.txt-in:focus{border-color:var(--purple)}
+.opt-hint{font-size:11px;color:var(--muted);font-weight:600;margin-bottom:6px}
+
+/* bottom nav */
+.bot-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:2px solid var(--border);padding:12px 20px;display:flex;gap:12px;z-index:200}
+.nav-bk{flex:0 0 100px;padding:14px;border:2px solid var(--border);border-radius:var(--rs);background:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;color:var(--muted)}
+.nav-nx{flex:1;padding:14px;border:none;border-radius:var(--rs);font-size:16px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;color:#fff;transition:all .2s}
+.nav-nx.am{background:linear-gradient(135deg,var(--accent),#FFB347)}
+.nav-nx.pm{background:linear-gradient(135deg,var(--secondary),#45B7AA)}
+.nav-nx:disabled{opacity:.45;cursor:not-allowed}
+
+/* complete */
+.done-wrap{text-align:center;padding:60px 0 32px}
+.done-ico{font-size:90px;display:block;margin-bottom:20px;animation:pop .5s ease}
+@keyframes pop{0%{transform:scale(0)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
+.done-ttl{font-family:'Gaegu',cursive;font-size:32px;font-weight:700;margin-bottom:8px}
+.done-sub{font-size:15px;color:var(--muted);line-height:1.7}
+.sum-card{background:#fff;border-radius:var(--r);padding:20px;margin:24px 0;box-shadow:var(--shadow)}
+.sum-row{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px;gap:12px}
+.sum-row:last-child{border-bottom:none}
+.sum-k{color:var(--muted);font-weight:500;flex-shrink:0}
+.sum-v{font-weight:700;text-align:right}
+
+/* misc */
+.loader{position:fixed;inset:0;background:rgba(255,255,255,.92);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:999}
+.loader.on{display:flex}
+.spin{width:50px;height:50px;border:5px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:#fff;padding:12px 24px;border-radius:99px;font-size:14px;font-weight:600;opacity:0;transition:all .3s;z-index:999;white-space:nowrap}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:none;align-items:flex-end}
+.modal.on{display:flex}
+.sheet{background:#fff;border-radius:24px 24px 0 0;padding:28px 24px 40px;width:100%;max-height:80vh;overflow-y:auto}
+.sheet h3{font-size:18px;font-weight:900;margin-bottom:20px}
+.m-lbl{font-size:13px;font-weight:700;color:var(--muted);margin-bottom:8px;display:block}
+.m-in{width:100%;padding:12px 16px;border:2px solid var(--border);border-radius:var(--rs);font-size:15px;font-family:'Noto Sans KR',sans-serif;margin-bottom:16px;color:var(--text);outline:none;transition:border-color .2s}
+.m-in:focus{border-color:var(--primary)}
+.m-hint{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:20px;background:var(--pl);padding:12px;border-radius:var(--rs)}
+.m-hint code{background:rgba(0,0,0,.08);padding:1px 5px;border-radius:4px;font-size:10px}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="logo">🦊 Fox<span>LC</span></div>
+  <div class="hdr-date" id="hdrDate"></div>
+  <button class="gear" onclick="openModal()">⚙️</button>
+</header>
+<div class="prog"><div class="prog-fill" id="prog" style="width:0%"></div></div>
+
+<!-- LANDING -->
+<div id="s-land" class="scr on">
+  <div class="hero">
+    <span class="hero-ico">😊</span>
+    <h1>오늘 기분은 어때요?</h1>
+    <p>매일 잠깐씩 체크해요<br>나를 더 잘 알아가는 시간이에요 ✨</p>
+  </div>
+  <p class="lbl">📋 내 이름을 골라요</p>
+  <div class="sel-wrap">
+    <select class="name-sel" id="nameSel" onchange="pickName(this)">
+      <option value="">-- 이름을 선택하세요 --</option>
+    </select>
+  </div>
+  <p class="lbl">⏰ 지금은 언제인가요?</p>
+  <div class="ses-grid">
+    <div class="ses-card am" id="c-am" onclick="pickSes('morning')">
+      <span class="ses-ico">🌅</span>
+      <div class="ses-lbl">입실 체크</div>
+      <div class="ses-desc">센터에 도착했어요</div>
+    </div>
+    <div class="ses-card pm" id="c-pm" onclick="pickSes('evening')">
+      <span class="ses-ico">🌙</span>
+      <div class="ses-lbl">퇴실 체크</div>
+      <div class="ses-desc">집에 가기 전이에요</div>
+    </div>
+  </div>
+  <button class="btn btn-p" id="startBtn" onclick="startSurvey()" disabled>체크 시작하기 →</button>
+</div>
+
+<!-- QUESTIONS -->
+<div id="s-q" class="scr">
+  <div class="q-hdr">
+    <div class="badge b-am" id="badge">🌅 입실 체크</div>
+    <div class="q-name-lbl">안녕하세요,</div>
+    <div class="q-name" id="qName"></div>
+  </div>
+  <div id="qBox"></div>
+</div>
+
+<!-- COMPLETE -->
+<div id="s-done" class="scr">
+  <div class="done-wrap">
+    <span class="done-ico" id="dIco">🎉</span>
+    <h2 class="done-ttl" id="dTtl">잘했어요!</h2>
+    <p class="done-sub" id="dSub"></p>
+  </div>
+  <div class="sum-card" id="sumCard"></div>
+  <button class="btn btn-p" onclick="reset()" style="margin-top:8px">처음으로 돌아가기</button>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bot-nav" id="botNav" style="display:none">
+  <button class="nav-bk" id="navBk" onclick="go(-1)">← 이전</button>
+  <button class="nav-nx am" id="navNx" onclick="go(1)">다음 →</button>
+</div>
+
+<div class="loader" id="loader"><div class="spin"></div><div style="font-size:16px;font-weight:700;color:var(--muted)">저장 중이에요... 🦊</div></div>
+<div class="toast" id="toast"></div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal" id="modal">
+  <div class="sheet">
+    <h3>⚙️ 설정</h3>
+    <label class="m-lbl">📋 학생 이름 목록 (쉼표로 구분)</label>
+    <input class="m-in" id="mNames" placeholder="예: 김민준, 이서연, 박도윤">
+    <label class="m-lbl">🔗 Google Apps Script URL</label>
+    <input class="m-in" id="mUrl" placeholder="https://script.google.com/macros/s/.../exec">
+    <div class="m-hint">
+      📌 <strong>Google Sheets 연동 방법</strong><br><br>
+      1. <a href="https://script.google.com" target="_blank">script.google.com</a> → 새 프로젝트<br>
+      2. 아래 코드 붙여넣고 저장<br>
+      3. 배포 → 새 배포 → 웹 앱 → 액세스: <code>모든 사용자</code><br>
+      4. 배포 URL을 위 입력창에 붙여넣기<br><br>
+      <code style="display:block;padding:8px;background:rgba(0,0,0,.06);border-radius:8px;font-size:10px;line-height:1.7;white-space:pre-wrap">function doPost(e) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var data = JSON.parse(e.postData.contents);
+  var sheetName = data.session === 'morning' ? '입실' : '퇴실';
+  var sheet = ss.getSheetByName(sheetName) || ss.insertSheet(sheetName);
+  if (sheet.getLastRow() === 0) sheet.appendRow(Object.keys(data));
+  sheet.appendRow(Object.values(data));
+  return ContentService.createTextOutput(
+    JSON.stringify({result:'ok'})
+  ).setMimeType(ContentService.MimeType.JSON);
+}</code>
+    </div>
+    <button class="btn btn-p" onclick="saveModal()">저장하기</button>
+    <button class="btn btn-s" onclick="closeModal()">닫기</button>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────
+const K_NAMES  = 'foxlc_names';
+const K_SCRIPT = 'foxlc_script_url';
+
+const NAMES = [
+  '강설현','고윤아','김민준','김소은','김승운','김예은','김윤성','김재이','김재윤',
+  '김제인','김태웅','김현서','김현우','김유진','서재현','성시윤','손아율','손태율',
+  '송서후','송예온','송지호','신연재','신유준','여소현','여승현','여창현','오엘리',
+  '오하성','유가영','이디아나','이시호','이윤호','이이린','이재이','이지오','조아인',
+  '조은혁','조유나','조윤재','조이서','조하은','최서하','최윤서','최윤재','최주원',
+  '박래승','박영찬','홍근준'
+];
+
+const ROT = [
+  '오늘 내가 가장 감사했던 순간은?',
+  '오늘 내가 용기를 낸 순간은?',
+  '오늘 내가 참은 순간은?',
+  '오늘 가장 기뻤던 일은?',
+  '오늘 내가 배운 한 가지는?'
+];
+
+// ── QUESTION DATA ────────────────────────────────
+const MQ = [
+  { id:'axis1_emotion',    axis:'축1·정서안정(①)',        text:'지금 내 마음은 어때요?',                                                              type:'scale',  emojis:['😢','😟','😐','😊','😄'], labels:['아주 힘들어요','아주 좋아요'] },
+  { id:'axis1_energy',     axis:'축4 예측(④)',             text:'오늘 내 에너지는 얼마나 있어요?',                                                     type:'scale',  emojis:['🪫','😴','🔋','⚡','🔥'],  labels:['전혀 없어요','많이 넘쳐요'] },
+  { id:'axis1_anxiety',    axis:'축1 조기개입(①)',         text:'오늘 걱정되거나 불안한 일이 있나요?',                                                 type:'yesno',
+    sub:[
+      { id:'axis1_anxiety_level',  text:'① 걱정의 크기는 어느 정도인가요?', type:'scale', emojis:['😌','🤔','😰','😨','😱'], labels:['조금','많이'] },
+      { id:'axis1_anxiety_reason', text:'② 어떤 이유인지 간단히 적어볼까요?', type:'text', placeholder:'짧게 적어도 괜찮아요', opt:true }
+    ]
+  },
+  { id:'axis2_goal',       axis:'축2 목표설정(④+①②)',    text:'오늘 가장 집중하고 싶은 목표 하나를 골라보세요!',                                     type:'choice',
+    opts:[{i:'🤝',t:'친구들과 사이좋게 지내기'},{i:'📚',t:'수업·활동에 집중해서 끝내기'},{i:'🧘',t:'감정을 잘 조절하기'},{i:'📋',t:'선생님 말씀을 잘 따르기'}]
+  },
+  { id:'axis1_difficulty', axis:'예방적 SEL(①②④⑤)',      text:'오늘 가장 어려울 것 같은 상황은 뭐예요?',                                             type:'choice',
+    opts:[{i:'😤',t:'화가 날 때'},{i:'😵',t:'집중이 잘 안 될 때'},{i:'👥',t:'친구와 다툴 때'},{i:'😩',t:'해야 할 일을 미루고 싶을 때'},{i:'😊',t:'오늘은 괜찮아요'}]
+  },
+  { id:'axis1_coping',     axis:'축1 자기관리도구(①,2개까지)', text:'기분이 안 좋을 때, 어떤 방법이 도움이 될까요?',                                 type:'multi',  max:2,
+    opts:[{i:'🛋️',t:'잠시 쉬기'},{i:'💬',t:'내 감정을 말로 표현하기'},{i:'🙋',t:'선생님이나 친구에게 도움 요청하기'},{i:'🫁',t:'심호흡·스트레칭 하기'},{i:'🤫',t:'혼자 조용히 있기'}]
+  },
+  { id:'axis1_stop_intent',     axis:'축1 충동억제의도(①)', text:'오늘 감정이 올라갈 때, "멈추고 다시 생각하기"를 해볼 건가요?',                     type:'yesno' },
+  { id:'axis3_relation_intent', axis:'축3 관계·공감의도(②+③)', text:'오늘 친구들에게 어떤 좋은 태도를 보여줄까요?',                                  type:'choice',
+    opts:[{i:'💛',t:'친구의 기분을 이해하고 공감하기'},{i:'👂',t:'친구의 말을 끝까지 듣기'},{i:'🔄',t:'차례를 지키며 함께 하기'},{i:'👋',t:'먼저 친절하게 다가가기'}]
+  }
+];
+
+const EQ = [
+  { id:'axis1_emotion_change', axis:'축1 정서변화(①)',     text:'오늘 내 마음은 입실 때와 비교해서 어땠어요?',                                        type:'scale',  emojis:['😢','😟','😐','😊','😄'], labels:['더 힘들었어요','훨씬 더 좋아졌어요'] },
+  { id:'axis2_goal_score',     axis:'축2 목표달성(④)',     text:'오늘 세운 목표를 얼마나 잘 해냈나요?',                                                type:'scale',  emojis:['😞','🤔','😐','😊','🎉'], labels:['전혀 못 했어요','아주 잘 했어요'] },
+  { id:'axis3_relation',       axis:'축3 관계(②)',         text:'오늘 친구들과의 관계는 어땠어요?',                                                    type:'scale',  emojis:['😤','😕','😐','😊','🥰'], labels:['별로 좋지 않았어요','아주 좋았어요'] },
+  { id:'axis3_prosocial',      axis:'축3 친사회성(③)',     text:'오늘 다른 사람을 위해 배려하거나 도와준 적이 있나요?',                                type:'yesno',
+    sub:[{ id:'axis3_prosocial_type', text:'어떤 행동을 했어요? (복수 선택 가능)', type:'multi', max:5, opts:[{i:'🤲',t:'도와주기'},{i:'🤝',t:'양보하기'},{i:'👂',t:'친구 말 잘 들어주기'},{i:'💌',t:'사과하기'},{i:'📣',t:'격려하기'}] }]
+  },
+  { id:'axis1_selfcontrol',    axis:'축1 자기관리(①)',     text:'오늘 내 감정을 잘 조절한 적이 있나요?',                                               type:'yesno',
+    sub:[{ id:'axis1_selfcontrol_type', text:'어떤 방법을 썼어요? (복수 선택 가능)', type:'multi', max:5, opts:[{i:'🫁',t:'심호흡하기'},{i:'💬',t:'말로 표현하기'},{i:'✋',t:'멈추고 생각하기'},{i:'🙋',t:'도움 요청하기'},{i:'🚶',t:'잠시 자리 피하기'}] }]
+  },
+  { id:'axis3_conflict',       axis:'축3+4 갈등빈도(②⑤)', text:'오늘 친구나 누군가와 갈등(다툼)이 있었나요?',                                         type:'yesno',
+    sub:[{ id:'axis3_conflict_strategy', text:'어떻게 해결했나요? (복수 선택 가능)', type:'multi', max:5, opts:[{i:'🗣️',t:'서로 대화하기'},{i:'📋',t:'규칙 다시 확인하기'},{i:'👩‍🏫',t:'선생님께 도움 요청하기'},{i:'🚶',t:'잠시 거리 두기'},{i:'💌',t:'사과하기'}] }]
+  },
+  { id:'axis4_focus',          axis:'축4 집중·참여(④+⑤)', text:'오늘 수업이나 활동에 얼마나 집중했나요?',                                              type:'scale',  emojis:['😴','😕','😐','🙂','🤩'], labels:['전혀 못 했어요','아주 잘 했어요'] },
+  { id:'self_praise',          axis:'💛 자기효능감',        text:'오늘 스스로 가장 자랑스러운 것은 뭐예요?',                                            type:'choice',
+    opts:[{i:'😊',t:'친구에게 친절하게 했어요'},{i:'💪',t:'끝까지 집중했어요'},{i:'🧘',t:'감정을 잘 조절했어요'},{i:'🙋',t:'도움을 요청하거나 도와줬어요'},{i:'🔥',t:'포기하지 않고 계속 해봤어요'}]
+  },
+  { id:'next_action',          axis:'🌟 다음행동연결',      text:'내일 다시 해보고 싶은 행동은 뭐예요?',                                               type:'choice',
+    opts:[{i:'✋',t:'싫다고 말하면 멈추기'},{i:'🙋',t:'도움 요청하기'},{i:'⏰',t:'5분 더 집중해보기'},{i:'👋',t:'먼저 인사하거나 친절하게 하기'},{i:'💬',t:'감정을 말로 표현하기'}]
+  },
+  { id:'daily_rotation', axis:'🔥 Daily Rotation', text:'', type:'text', placeholder:'짧게 적어도 괜찮아요', rot:true }
+];
+
+// ── STATE ────────────────────────────────────────
+const S = { name:'', ses:'', page:0, ans:{}, pages:[] };
+
+// ── INIT ─────────────────────────────────────────
+addEventListener('DOMContentLoaded', () => {
+  const d = new Date();
+  const days = ['일','월','화','수','목','금','토'];
+  $('hdrDate').textContent = `${d.getMonth()+1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
+  buildNameSel();
+  // set today's rotation question
+  const rq = EQ.find(q => q.rot);
+  if (rq) rq.text = ROT[((d.getDay()+6)%7) % ROT.length];
+});
+
+function $(id){ return document.getElementById(id) }
+function show(id){ document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on')); $(id).classList.add('on') }
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('on'); setTimeout(()=>t.classList.remove('on'),2200) }
+function setP(pct){ $('prog').style.width = pct+'%' }
+
+function buildNameSel() {
+  const saved = localStorage.getItem(K_NAMES);
+  const names = saved ? saved.split(',').map(n=>n.trim()).filter(Boolean) : NAMES;
+  const sel = $('nameSel');
+  sel.innerHTML = '<option value="">-- 이름을 선택하세요 --</option>';
+  [...names].sort((a,b)=>a.localeCompare(b,'ko')).forEach(n => {
+    const o = document.createElement('option');
+    o.value = o.textContent = n;
+    sel.appendChild(o);
+  });
+}
+
+// ── LANDING ──────────────────────────────────────
+function pickName(sel){ S.name=sel.value; sel.classList.toggle('on',!!sel.value); checkReady() }
+function pickSes(s){
+  S.ses=s;
+  $('c-am').classList.toggle('on', s==='morning');
+  $('c-pm').classList.toggle('on', s==='evening');
+  checkReady();
+}
+function checkReady(){ $('startBtn').disabled = !(S.name && S.ses) }
+
+// ── SURVEY ───────────────────────────────────────
+function startSurvey() {
+  const qs = S.ses==='morning' ? MQ : EQ;
+  S.pages = []; S.page = 0; S.ans = {};
+  for (let i=0; i<qs.length; i+=2) S.pages.push(qs.slice(i,i+2));
+  renderPage();
+  show('s-q');
+  $('botNav').style.display='flex';
+  updateNav();
+}
+
+function renderPage() {
+  const box = $('qBox');
+  box.innerHTML = '';
+  const am = S.ses==='morning';
+  const badge = $('badge');
+  badge.className = 'badge '+(am?'b-am':'b-pm');
+  badge.textContent = am ? '🌅 입실 체크' : '🌙 퇴실 체크';
+  $('navNx').className = 'nav-nx '+(am?'am':'pm');
+  $('qName').textContent = S.name+' 학생';
+
+  const total = S.pages.reduce((a,p)=>a+p.length,0);
+  let gi = S.pages.slice(0,S.page).reduce((a,p)=>a+p.length,0);
+  S.pages[S.page].forEach(q => box.appendChild(buildCard(q,++gi,total)));
+
+  setP(Math.round(S.page/S.pages.length*100));
+  scrollTo({top:0,behavior:'smooth'});
+}
+
+function buildCard(q, gi, total) {
+  const card = document.createElement('div');
+  card.className = 'q-card'+(answered(q)?' done':'');
+  card.id = 'c-'+q.id;
+
+  let h = q.rot ? '<div class="rot-tag">🔥 오늘의 특별 질문</div>' : '';
+  h += `<div class="q-n">Q${gi} / ${total}</div><div class="q-t">${q.text}</div><div class="q-ax">${q.axis}</div><div id="i-${q.id}"></div>`;
+  (q.sub||[]).forEach(s => {
+    h += `<div class="sub ${S.ans[q.id]==='yes'?'on':''}" id="s-${q.id}-${s.id}"><div class="sub-t">${s.text}</div><div id="i-${s.id}"></div></div>`;
+  });
+  card.innerHTML = h;
+
+  renderIn(q, card.querySelector('#i-'+q.id), false);
+  (q.sub||[]).forEach(s => renderIn(s, card.querySelector('#i-'+s.id), true, q.id));
+  return card;
+}
+
+function answered(q) {
+  if (q.opt || q.type==='text') return true;
+  if (q.type==='multi') return Array.isArray(S.ans[q.id]) && S.ans[q.id].length>0;
+  return S.ans[q.id] !== undefined && S.ans[q.id] !== '';
+}
+
+// ── INPUT RENDERERS ──────────────────────────────
+function renderIn(q, zone, isSub, pid) {
+  if (!zone) return;
+  const {id, type} = q;
+
+  if (type==='scale') {
+    const row = el('div','sc-row');
+    for (let i=1; i<=5; i++) {
+      const b = el('button','sc-btn'+(S.ans[id]===i?' on':''));
+      b.innerHTML = `<span>${q.emojis[i-1]}</span><span class="n">${i}</span>`;
+      b.onclick = () => { save(id,i); row.querySelectorAll('.sc-btn').forEach(x=>x.classList.remove('on')); b.classList.add('on'); if(!isSub) mark(pid||id) };
+      row.appendChild(b);
+    }
+    const lbl = el('div','sc-lbl');
+    lbl.innerHTML = `<span>${q.labels[0]}</span><span>${q.labels[1]}</span>`;
+    zone.append(row, lbl);
+
+  } else if (type==='yesno') {
+    const row = el('div','yn-row');
+    ['yes','no'].forEach(v => {
+      const b = el('button','yn-btn '+(v==='yes'?'y':'n')+(S.ans[id]===v?' on':''));
+      b.textContent = v==='yes' ? '✅  예' : '❌  아니요';
+      b.onclick = () => {
+        save(id,v); row.querySelectorAll('.yn-btn').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+        mark(id);
+        (q.sub||[]).forEach(s => { const e=document.getElementById(`s-${id}-${s.id}`); if(e) e.classList.toggle('on',v==='yes') });
+      };
+      row.appendChild(b);
+    });
+    zone.appendChild(row);
+
+  } else if (type==='choice' || type==='multi') {
+    if (type==='multi') {
+      const hint = el('div','m-hint');
+      hint.textContent = q.max < q.opts.length ? `최대 ${q.max}개까지 선택할 수 있어요` : '해당하는 것을 모두 선택하세요';
+      zone.appendChild(hint);
+    }
+    const grid = el('div','ch-grid');
+    const cur = () => Array.isArray(S.ans[id]) ? S.ans[id] : [];
+    q.opts.forEach(o => {
+      const b = el('button','ch-btn'+((type==='choice'?S.ans[id]===o.t:cur().includes(o.t))?' on':''));
+      b.innerHTML = `<span class="ico">${o.i}</span>${o.t}`;
+      b.onclick = () => {
+        if (type==='choice') {
+          save(id, o.t);
+          grid.querySelectorAll('.ch-btn').forEach(x=>x.classList.remove('on'));
+          b.classList.add('on');
+          if(!isSub) mark(pid||id);
+        } else {
+          let arr=[...cur()];
+          if (arr.includes(o.t)) { arr=arr.filter(x=>x!==o.t); b.classList.remove('on') }
+          else {
+            if (q.max && arr.length>=q.max) { toast(`최대 ${q.max}개까지만 선택할 수 있어요!`); return }
+            arr.push(o.t); b.classList.add('on');
+          }
+          save(id,arr); if(!isSub) mark(pid||id);
+        }
+      };
+      grid.appendChild(b);
+    });
+    zone.appendChild(grid);
+
+  } else if (type==='text') {
+    if (q.opt) { const h=el('div','opt-hint'); h.textContent='✏️ 선택 사항 — 쓰고 싶은 것만 적어요'; zone.appendChild(h) }
+    const ta = document.createElement('textarea');
+    ta.className='txt-in'; ta.rows=2; ta.placeholder=q.placeholder||''; ta.value=S.ans[id]||'';
+    ta.oninput = () => { save(id,ta.value); if(!isSub) mark(pid||id) };
+    zone.appendChild(ta);
+  }
+}
+
+function el(tag, cls){ const e=document.createElement(tag); e.className=cls; return e }
+function save(id,val){ S.ans[id]=val }
+function mark(id){ const c=$(('c-'+id)); if(c) c.classList.add('done') }
+
+// ── NAV ──────────────────────────────────────────
+function updateNav() {
+  $('navBk').style.visibility = S.page===0 ? 'hidden' : 'visible';
+  $('navNx').textContent = S.page===S.pages.length-1 ? '제출하기 🎉' : '다음 →';
+}
+
+function go(dir) {
+  if (dir===1) {
+    const bad = S.pages[S.page].filter(q=>!answered(q));
+    if (bad.length) { toast('모든 질문에 답해줘야 해요! 😊'); return }
+    if (S.page===S.pages.length-1) { submit(); return }
+    S.page++;
+  } else {
+    if (S.page===0) return;
+    S.page--;
+  }
+  renderPage(); updateNav();
+}
+
+// ── SUBMIT ───────────────────────────────────────
+async function submit() {
+  const d = new Date();
+  const payload = {
+    timestamp: d.toISOString(),
+    date: d.toISOString().slice(0,10),
+    time: `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`,
+    student_name: S.name,
+    session: S.ses
+  };
+  Object.entries(S.ans).forEach(([k,v]) => { payload[k] = Array.isArray(v) ? v.join(' / ') : v });
+
+  const url = localStorage.getItem(K_SCRIPT);
+  setP(100);
+  if (!url) { showDone(payload,false); return }
+
+  $('loader').classList.add('on');
+  $('botNav').style.display='none';
+  try {
+    await fetch(url, { method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+    showDone(payload,true);
+  } catch { showDone(payload,false) }
+  finally { $('loader').classList.remove('on') }
+}
+
+function showDone(p, saved) {
+  const am = p.session==='morning';
+  $('dIco').textContent = am ? '🌟' : '🎉';
+  $('dTtl').textContent = am ? '좋은 하루 보내요!' : '오늘도 고생했어요!';
+  $('dSub').innerHTML   = saved
+    ? '솔직하게 체크해줘서 고마워요! 📊<br>선생님한테 잘 전달됐어요 ✅'
+    : '체크 완료! 잘 했어요 😊<br><small style="color:#9CA3AF">(설정에서 연결하면 자동 저장돼요)</small>';
+
+  const LBL = { date:'📅 날짜',time:'🕐 시간',student_name:'👤 이름',
+    axis1_emotion:'😊 마음점수', axis1_energy:'⚡ 에너지',
+    axis1_emotion_change:'😊 마음변화', axis2_goal:'🎯 오늘목표',
+    axis2_goal_score:'✅ 목표달성', axis3_relation:'🤝 관계',
+    axis4_focus:'📚 집중도', self_praise:'💛 자기칭찬',
+    next_action:'🌟 내일다짐', daily_rotation:'🔥 오늘의질문' };
+  const KEYS = am
+    ? ['date','time','student_name','axis1_emotion','axis1_energy','axis2_goal']
+    : ['date','time','student_name','axis1_emotion_change','axis2_goal_score','axis3_relation','axis4_focus','self_praise','daily_rotation'];
+
+  $('sumCard').innerHTML = KEYS.filter(k=>p[k]!==undefined&&p[k]!=='')
+    .map(k=>`<div class="sum-row"><span class="sum-k">${LBL[k]||k}</span><span class="sum-v">${p[k]}</span></div>`).join('');
+
+  show('s-done');
+  $('botNav').style.display='none';
+}
+
+// ── RESET ─────────────────────────────────────────
+function reset() {
+  Object.assign(S, {name:'',ses:'',page:0,ans:{},pages:[]});
+  const sel=$('nameSel'); sel.value=''; sel.classList.remove('on');
+  $('c-am').classList.remove('on'); $('c-pm').classList.remove('on');
+  $('startBtn').disabled=true; setP(0);
+  $('botNav').style.display='none';
+  show('s-land'); scrollTo({top:0});
+}
+
+// ── SETTINGS MODAL ────────────────────────────────
+function openModal()  { $('mNames').value=localStorage.getItem(K_NAMES)||''; $('mUrl').value=localStorage.getItem(K_SCRIPT)||''; $('modal').classList.add('on') }
+function closeModal() { $('modal').classList.remove('on') }
+function saveModal()  {
+  const n=$('mNames').value.trim(), u=$('mUrl').value.trim();
+  if(n) localStorage.setItem(K_NAMES,n);
+  if(u) localStorage.setItem(K_SCRIPT,u);
+  buildNameSel(); closeModal(); toast('설정이 저장됐어요 ✅');
+}
+$('modal').addEventListener('click', e => { if(e.target===$('modal')) closeModal() });
+</script>
+</body>
+</html>

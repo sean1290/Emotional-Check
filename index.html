@@ -252,6 +252,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);min-height:100vh
 // ── CONFIG ──────────────────────────────────────
 const K_NAMES  = 'foxlc_names';
 const K_SCRIPT = 'foxlc_script_url';
+const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwedYG4qbDZn1F2J7a8DTP8bG2DHpdq7MMpI-6YO8DnNC-E1hBn38p8l5DDw-MVXZhhQg/exec';
 
 const NAMES = [
   '강설현','고윤아','김민준','김소은','김승운','김예은','김윤성','김재이','김재윤',
@@ -517,7 +518,7 @@ async function submit() {
   };
   Object.entries(S.ans).forEach(([k,v]) => { payload[k] = Array.isArray(v) ? v.join(' / ') : v });
 
-  const url = localStorage.getItem(K_SCRIPT);
+  const url = localStorage.getItem(K_SCRIPT) || DEFAULT_SCRIPT_URL;
   setP(100);
   if (!url) { showDone(payload,false); return }
 
